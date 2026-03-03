@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AICA GPU 자원 관리·운영 지침 | Prepared by Dabeeo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700&family=Inter:wght@400;600;700&display=swap');
+        
+        :root { --primary-blue: #1e40af; --dabeeo-navy: #0f172a; }
+        body { 
+            font-family: 'Pretendard', 'Inter', sans-serif; 
+            background-color: #f8fafc; 
+            word-break: keep-all; /* Prevent awkward word breaks in Korean */
+            overflow-wrap: break-word;
+        }
+        
+        .sticky-nav { position: sticky; top: 5rem; z-index: 40; }
+        .content-card { background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        .section-title { border-left: 4px solid var(--primary-blue); padding-left: 1rem; margin-bottom: 1.5rem; }
+        .section-title-red { border-left: 4px solid #dc2626; padding-left: 1rem; margin-bottom: 1.5rem; }
+        
+        /* Language Toggle Logic */
+        [data-lang="en"] { display: none; }
+        html[lang="en"] [data-lang="ko"] { display: none; }
+        html[lang="en"] [data-lang="en"] { display: block; }
+        html[lang="en"] .lang-en-inline { display: inline; }
+        html[lang="en"] .lang-ko-inline { display: none; }
+        
+        .lang-btn.active { background-color: white; color: var(--primary-blue); font-weight: bold; }
+        html { scroll-behavior: smooth; }
+
+        /* Table Optimization */
+        table { width: 100%; table-layout: auto; }
+        th, td { vertical-align: middle; }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- Sticky Language Switcher -->
+    <div class="sticky top-0 z-50 bg-blue-950 py-3 shadow-md">
+        <div class="max-w-5xl mx-auto px-4 flex justify-end items-center gap-2">
+            <span class="text-blue-200 text-xs mr-2 font-semibold tracking-wider text-opacity-70">LANGUAGE:</span>
+            <div class="bg-blue-900 p-1 rounded-lg flex shadow-inner">
+                <button onclick="changeLang('ko')" id="btn-ko" class="lang-btn active px-4 py-1 rounded-md text-sm transition-all duration-300">KO</button>
+                <button onclick="changeLang('en')" id="btn-en" class="lang-btn px-4 py-1 text-white rounded-md text-sm transition-all duration-300">EN</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header Area -->
+    <header class="bg-blue-900 text-white py-12 px-4 shadow-lg border-b border-blue-800 text-center">
+        <div class="max-w-4xl mx-auto">
+            <div class="mb-4 inline-block px-3 py-1 bg-blue-800 rounded-full text-[10px] font-bold tracking-[0.2em] text-blue-200 uppercase">
+                Dabeeo Inc.
+            </div>
+            <h1 data-lang="ko" class="text-3xl md:text-4xl font-bold mb-4">AICA GPU 자원 관리·운영 지침</h1>
+            <h1 data-lang="en" class="text-3xl md:text-4xl font-bold mb-4 leading-tight">AICA GPU Resource Management Guidelines</h1>
+            <p data-lang="ko" class="text-blue-100 opacity-90 text-lg">안정적인 인프라 운영 및 보안 강화를 위한 통합 가이드라인</p>
+            <p data-lang="en" class="text-blue-100 opacity-90 text-lg">Consolidated Guidelines for Stable Infrastructure Operation and Security</p>
+        </div>
+    </header>
+
+    <div class="max-w-5xl mx-auto px-4 py-8 flex flex-col md:flex-row gap-8">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="w-full md:w-64 shrink-0">
+            <div class="sticky-nav bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <h2 class="font-bold text-lg mb-4 text-blue-900">
+                    <i class="fa-solid fa-list-ul mr-2"></i>
+                    <span data-lang="ko">목차</span><span data-lang="en">Contents</span>
+                </h2>
+                <nav class="space-y-1 text-sm">
+                    <a href="#section1" class="block py-2 px-3 rounded hover:bg-red-50 text-red-600 font-bold transition">
+                        <span data-lang="ko">1. 위반 유형</span><span data-lang="en">1. Violation Types</span>
+                    </a>
+                    <a href="#section2" class="block py-2 px-3 rounded hover:bg-blue-50 hover:text-blue-700 transition font-medium">
+                        <span data-lang="ko">2. 주요 발생 사례</span><span data-lang="en">2. Key Misuse Cases</span>
+                    </a>
+                    <a href="#section3" class="block py-2 px-3 rounded hover:bg-blue-50 hover:text-blue-700 transition font-medium">
+                        <span data-lang="ko">3. 운영·심의 기준</span><span data-lang="en">3. Operation Criteria</span>
+                    </a>
+                    <a href="#section4" class="block py-2 px-3 rounded hover:bg-blue-50 hover:text-blue-700 transition font-medium">
+                        <span data-lang="ko">4. 조치 및 제재</span><span data-lang="en">4. Actions & Sanctions</span>
+                    </a>
+                    <a href="#section5" class="block py-2 px-3 rounded hover:bg-blue-50 hover:text-blue-700 transition font-medium">
+                        <span data-lang="ko">5. 예방 확인사항</span><span data-lang="en">5. Prevention Checklist</span>
+                    </a>
+                    <a href="#section6" class="block py-2 px-3 rounded hover:bg-blue-50 hover:text-blue-700 transition font-medium">
+                        <span data-lang="ko">6. 방지 대책</span><span data-lang="en">6. Security Principles</span>
+                    </a>
+                    <a href="#section7" class="block py-2 px-3 rounded hover:bg-blue-50 hover:text-blue-700 transition font-medium">
+                        <span data-lang="ko">7. 자원 활용 절차</span><span data-lang="en">7. Resource Utilization</span>
+                    </a>
+                    <a href="#section8" class="block py-2 px-3 rounded hover:bg-blue-50 hover:text-blue-700 transition font-medium">
+                        <span data-lang="ko">8. 교육 및 문의</span><span data-lang="en">8. Training & Contact</span>
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-grow space-y-12">
+
+            <!-- Intro Section -->
+            <section class="content-card p-8 text-slate-600 border-t-4 border-blue-900">
+                <p data-lang="ko" class="leading-relaxed">
+                    본 지침은 <span class="font-bold text-slate-800 border-b-2 border-blue-200">다비오(Dabeeo Inc.)</span>에서 작성하였으며, 인공지능산업융합사업단(AICA)에서 제공하는 GPU 자원의 부정 사용을 방지하고 보안 사고를 사전에 예방하여 전체 구성원이 안정적으로 자원을 활용할 수 있도록 함을 목적으로 합니다.
+                </p>
+                <p data-lang="en" class="leading-relaxed">
+                    These guidelines, prepared by <span class="font-bold text-slate-800 border-b-2 border-blue-200">Dabeeo Inc.</span>, aim to prevent the misuse of GPU resources provided by AICA and ensure stable resource utilization for all members by proactively preventing security incidents.
+                </p>
+            </section>
+
+            <!-- 1. Violation Types (HIGHLIGHTED IN RED) -->
+            <section id="section1" class="scroll-mt-32">
+                <h2 class="section-title-red text-2xl font-bold text-red-600">
+                    <span data-lang="ko">1. 부정사용 및 관리 위반 유형</span>
+                    <span data-lang="en">1. Types of Misuse and Violations</span>
+                </h2>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="bg-red-50 p-6 rounded-lg shadow-sm border border-red-100">
+                        <h3 class="font-bold mb-3 text-red-700">
+                            <i class="fa-solid fa-ban mr-2"></i>
+                            <span data-lang="ko">목적 외 사용</span><span data-lang="en">Out-of-Purpose Use</span>
+                        </h3>
+                        <ul data-lang="ko" class="list-disc list-inside space-y-2 text-red-800 text-sm opacity-90">
+                            <li>이용신청/계획서에 명시된 과제 외 목적 사용</li>
+                            <li>가상화폐 채굴(마이닝) 등 부정사용</li>
+                            <li>GPU Burn 등 인위적인 이용률 조작 프로그램 실행</li>
+                        </ul>
+                        <ul data-lang="en" class="list-disc list-inside space-y-2 text-red-800 text-sm opacity-90">
+                            <li>Use for projects not specified in the application</li>
+                            <li>Cryptocurrency mining and other unauthorized use</li>
+                            <li>Running programs to artificially inflate GPU utilization (e.g., GPU Burn)</li>
+                        </ul>
+                    </div>
+                    <div class="bg-red-50 p-6 rounded-lg shadow-sm border border-red-100">
+                        <h3 class="font-bold mb-3 text-red-700">
+                            <i class="fa-solid fa-eye-slash mr-2"></i>
+                            <span data-lang="ko">모니터링 방해</span><span data-lang="en">Monitoring Interference</span>
+                        </h3>
+                        <ul data-lang="ko" class="list-disc list-inside space-y-2 text-red-800 text-sm opacity-90">
+                            <li>모니터링 Agent 임의 삭제</li>
+                            <li>기술지원 및 재설치 요구 불응</li>
+                            <li>모니터링 불가 상태 장기 방치</li>
+                        </ul>
+                        <ul data-lang="en" class="list-disc list-inside space-y-2 text-red-800 text-sm opacity-90">
+                            <li>Arbitrary deletion of Monitoring Agent</li>
+                            <li>Refusal to reinstall requested by support</li>
+                            <li>Leaving resources in a non-monitorable state</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. Major Misuse Cases -->
+            <section id="section2" class="scroll-mt-32">
+                <h2 class="section-title text-2xl font-bold text-blue-900">
+                    <span data-lang="ko">2. 주요 발생 사례 및 원인</span>
+                    <span data-lang="en">2. Major Misuse Cases and Causes</span>
+                </h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse bg-white rounded-lg overflow-hidden shadow-sm border border-slate-200 min-w-[600px]">
+                        <thead>
+                            <tr class="border-b border-slate-200">
+                                <th class="p-4 font-semibold text-slate-700 w-1/4 whitespace-nowrap"><span data-lang="ko">구분</span><span data-lang="en">Category</span></th>
+                                <th class="p-4 font-semibold text-slate-700"><span data-lang="ko">주요 사례 및 원인</span><span data-lang="en">Case and Primary Cause</span></th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-sm divide-y divide-slate-100 text-slate-600">
+                            <tr>
+                                <td class="p-4 font-bold text-blue-800 bg-blue-50/30 whitespace-nowrap">Malware</td>
+                                <td class="p-4">
+                                    <span data-lang="ko">GitHub 등에서 트레이닝용 실행파일 다운로드 시 채굴 기능이 포함된 악성코드 설치 사례</span>
+                                    <span data-lang="en">Mining malware infection cases through downloaded training scripts/executables from GitHub.</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="p-4 font-bold text-blue-800 bg-blue-50/30 whitespace-nowrap">Security</td>
+                                <td class="p-4">
+                                    <span data-lang="ko">서버 보안 설정 전체 Open(Any), 접속 IP 차단 정책 미적용, 불필요한 test 계정 운영</span>
+                                    <span data-lang="en">Wide-open security groups (Any), missing IP whitelist policies, maintaining unnecessary test accounts.</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="p-4 font-bold text-blue-800 bg-blue-50/30 whitespace-nowrap">Port Mgmt</td>
+                                <td class="p-4">
+                                    <span data-lang="ko">추론 서비스 실증 등을 위한 포트 Open 후 미관리 (서비스 종료 후 미폐쇄)</span>
+                                    <span data-lang="en">Neglecting open ports after inference service verification tasks; failure to close ports post-verification.</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="p-4 font-bold text-blue-800 bg-blue-50/30 whitespace-nowrap">Account Mgmt</td>
+                                <td class="p-4">
+                                    <span data-lang="ko">계정 공유 이후 관리 미흡으로 인한 채굴 프로그램 설치·운영 사례 발생</span>
+                                    <span data-lang="en">Instances of mining program operation due to poor account hygiene following account sharing.</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 3. Operation Criteria -->
+            <section id="section3" class="scroll-mt-32">
+                <h2 class="section-title text-2xl font-bold text-blue-900">
+                    <span data-lang="ko">3. 자원 운영·심의 기준</span>
+                    <span data-lang="en">3. Operation and Deliberation Criteria</span>
+                </h2>
+                <div class="content-card p-8 bg-slate-50 border-l-8 border-amber-400 text-sm shadow-inner">
+                    <h3 class="text-lg font-bold mb-4 text-slate-800">
+                        <span data-lang="ko">자원 회수 및 심의 프로세스</span>
+                        <span data-lang="en">Resource Recovery Process</span>
+                    </h3>
+                    <p data-lang="ko" class="mb-4 text-slate-700 leading-relaxed">GPU 평균 이용률이 일정 기준에 미달할 경우, 사용 패턴과 향후 계획을 종합 검토하여 다음과 같이 조치합니다.</p>
+                    <p data-lang="en" class="mb-4 text-slate-700 leading-relaxed">If average GPU utilization falls below the threshold, a review of usage patterns and future plans leads to one of the following:</p>
+                    <div class="flex flex-wrap gap-4">
+                        <span class="bg-green-100 text-green-800 px-4 py-2 rounded-full font-bold border border-green-200 shadow-sm">
+                            <span data-lang="ko">지속 지원</span><span data-lang="en">Continue Support</span>
+                        </span>
+                        <span class="bg-amber-100 text-amber-800 px-4 py-2 rounded-full font-bold border border-amber-200 shadow-sm">
+                            <span data-lang="ko">일부 차감</span><span data-lang="en">Partial Reduction</span>
+                        </span>
+                        <span class="bg-red-100 text-red-800 px-4 py-2 rounded-full font-bold border border-red-200 shadow-sm">
+                            <span data-lang="ko">자원 회수</span><span data-lang="en">Full Recovery</span>
+                        </span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. Sanctions -->
+            <section id="section4" class="scroll-mt-32">
+                <h2 class="section-title text-2xl font-bold text-blue-900">
+                    <span data-lang="ko">4. 위반 시 조치 및 제재</span>
+                    <span data-lang="en">4. Actions and Sanctions</span>
+                </h2>
+                <div class="space-y-4">
+                    <div class="flex items-start gap-4 p-6 bg-red-50 rounded-xl border border-red-200 shadow-sm">
+                        <i class="fa-solid fa-circle-exclamation text-red-600 text-3xl mt-1"></i>
+                        <div>
+                            <h4 class="font-bold text-red-900 mb-2">
+                                <span data-lang="ko">즉시 조치 (자원 회수)</span><span data-lang="en">Immediate Action</span>
+                            </h4>
+                            <p class="text-sm text-red-800 leading-relaxed">
+                                <span data-lang="ko">목적 외 사용 확인 시 사전 통보 없이 <strong>즉시 자원 회수</strong>. 해당 이용자는 사실확인서(공문) 필수 제출.</span>
+                                <span data-lang="en">Immediate resource recovery without prior notice upon confirmation of misuse. Users must submit a fact confirmation letter.</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4 p-5 bg-white rounded-xl border border-slate-200 text-sm">
+                        <i class="fa-solid fa-clock-rotate-left text-slate-400 text-2xl mt-1"></i>
+                        <div>
+                            <h4 class="font-bold text-slate-800 mb-1">
+                                <span data-lang="ko">데이터 백업 기한 (10일)</span><span data-lang="en">Backup Period (10 Days)</span>
+                            </h4>
+                            <p class="text-slate-500 leading-relaxed">
+                                <span data-lang="ko">회수 통보일로부터 <strong>10일 이내</strong> 백업 완료 필수. 기한 초과 시 데이터 복구 불가.</span>
+                                <span data-lang="en">Backup must be completed within 10 days of notice. Recovery is absolutely impossible afterward.</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. Prevention Checklist -->
+            <section id="section5" class="scroll-mt-32">
+                <h2 class="section-title text-2xl font-bold text-blue-900">
+                    <span data-lang="ko">5. 주요 예방·확인 사항</span>
+                    <span data-lang="en">5. Key Preventive Items</span>
+                </h2>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-100">
+                        <h3 class="font-bold mb-3 text-blue-700">
+                            <i class="fa-solid fa-chart-line mr-2"></i>
+                            <span data-lang="ko">자원 사용량 모니터링</span><span data-lang="en">Usage Monitoring</span>
+                        </h3>
+                        <ul data-lang="ko" class="list-disc list-inside space-y-2 text-slate-600 text-sm">
+                            <li>CPU/GPU 사용률 상시 확인</li>
+                            <li>미사용 기간 중 사용률 급증 여부 점검</li>
+                            <li>콘솔 Monitoring 알림 기능 활용</li>
+                        </ul>
+                        <ul data-lang="en" class="list-disc list-inside space-y-2 text-slate-600 text-sm">
+                            <li>Regularly check CPU/GPU utilization</li>
+                            <li>Monitor for spikes during idle periods</li>
+                            <li>Utilize console monitoring notifications</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-100">
+                        <h3 class="font-bold mb-3 text-blue-700">
+                            <i class="fa-solid fa-shield-halved mr-2"></i>
+                            <span data-lang="ko">보안 규칙 설정</span><span data-lang="en">Security Rules</span>
+                        </h3>
+                        <ul data-lang="ko" class="list-disc list-inside space-y-2 text-slate-600 text-sm">
+                            <li>접속 IP를 <span class="text-red-600 font-bold">0.0.0.0/0</span>으로 설정 금지</li>
+                            <li>특정 IP/Port 기준으로 최소화 생성</li>
+                            <li>허용 IP에 대한 보안 정책 적용</li>
+                        </ul>
+                        <ul data-lang="en" class="list-disc list-inside space-y-2 text-slate-600 text-sm">
+                            <li>Do NOT set IP to <span class="text-red-600 font-bold">0.0.0.0/0</span></li>
+                            <li>Limit access to specific IPs/Ports</li>
+                            <li>Apply strict policies for allowed IPs</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 6. Operating Principles -->
+            <section id="section6" class="scroll-mt-32">
+                <h2 class="section-title text-2xl font-bold text-blue-900">
+                    <span data-lang="ko">6. 방지 대책 (운영 원칙)</span>
+                    <span data-lang="en">6. Security Principles</span>
+                </h2>
+                <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-100">
+                    <div class="grid md:grid-cols-2 gap-y-6 gap-x-12">
+                        <div class="flex gap-4">
+                            <div class="bg-blue-100 text-blue-700 w-10 h-10 rounded flex items-center justify-center shrink-0 font-bold">01</div>
+                            <div>
+                                <h4 class="font-bold text-slate-900">
+                                    <span data-lang="ko">계정 관리</span><span data-lang="en">Account Security</span>
+                                </h4>
+                                <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+                                    <span data-lang="ko">계정 공유 금지, 퇴사자 즉시 회수, 최소 권한 원칙 적용</span>
+                                    <span data-lang="en">No sharing, revoke accounts immediately, least privilege principle.</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="bg-blue-100 text-blue-700 w-10 h-10 rounded flex items-center justify-center shrink-0 font-bold">02</div>
+                            <div>
+                                <h4 class="font-bold text-slate-900">
+                                    <span data-lang="ko">접속 통제</span><span data-lang="en">Access Control</span>
+                                </h4>
+                                <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+                                    <span data-lang="ko">서버 접속 IP 제한, 업무 필요 IP만 허용</span>
+                                    <span data-lang="en">Restrict server access IP to business-essential addresses only.</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="bg-blue-100 text-blue-700 w-10 h-10 rounded flex items-center justify-center shrink-0 font-bold">03</div>
+                            <div>
+                                <h4 class="font-bold text-slate-900">
+                                    <span data-lang="ko">포트 관리</span><span data-lang="en">Port Control</span>
+                                </h4>
+                                <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+                                    <span data-lang="ko">불필요 포트 개방 금지, 실증 종료 즉시 차단</span>
+                                    <span data-lang="en">No unnecessary ports; close ports immediately after verification.</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="bg-blue-100 text-blue-700 w-10 h-10 rounded flex items-center justify-center shrink-0 font-bold">04</div>
+                            <div>
+                                <h4 class="font-bold text-slate-900">
+                                    <span data-lang="ko">정기 점검</span><span data-lang="en">Regular Audits</span>
+                                </h4>
+                                <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+                                    <span data-lang="ko">주기적 모니터링 및 보안 설정 현황 점검</span>
+                                    <span data-lang="en">Periodic monitoring and security configuration audits.</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 7. Resource Utilization Procedures -->
+            <section id="section7" class="scroll-mt-32">
+                <h2 class="section-title text-2xl font-bold text-blue-900">
+                    <span data-lang="ko">7. 자원 활용 절차</span>
+                    <span data-lang="en">7. Resource Utilization Procedures</span>
+                </h2>
+                <div class="relative pl-8 border-l-2 border-blue-100 space-y-8">
+                    <div class="relative">
+                        <div class="absolute -left-[41px] bg-blue-900 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs shadow-md">1</div>
+                        <h4 class="font-bold text-blue-900">
+                            <span data-lang="ko">활용 계획 수립</span><span data-lang="en">Plan Establishment</span>
+                        </h4>
+                        <p class="text-sm text-slate-600">
+                            <span data-lang="ko">신규 활용 목적 발생 시 사전 계획서 작성 및 필요성 명확화</span>
+                            <span data-lang="en">Draft a utilization plan for new purposes and clarify its necessity.</span>
+                        </p>
+                    </div>
+                    <div class="relative">
+                        <div class="absolute -left-[41px] bg-blue-900 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs shadow-md">2</div>
+                        <h4 class="font-bold text-blue-900">
+                            <span data-lang="ko">실무 검토 - Nate</span><span data-lang="en">Practical Review - Nate</span>
+                        </h4>
+                        <div class="text-sm text-slate-600 bg-blue-50/50 p-4 rounded-xl border border-blue-100 mt-1">
+                            <ul class="list-disc list-inside space-y-2">
+                                <li>
+                                    <span data-lang="ko">과제 목적 유관성 및 <b>지침 준수 사항</b> 상시 체크</span>
+                                    <span data-lang="en">Verify relevance to project goals and <b>guideline compliance</b>.</span>
+                                </li>
+                                <li>
+                                    <span data-lang="ko"><b>gpu-burn</b> 등 금지된 활용 코드, 커맨드 및 스크립트 적정성 검토</span>
+                                    <span data-lang="en">Review codes, commands (e.g., <b>gpu-burn</b>), and scripts for appropriateness.</span>
+                                </li>
+                                <li class="text-xs opacity-70 font-semibold italic">
+                                    <span data-lang="ko">(규정 해석 및 사업 조건 관련은 <b>bleu</b>와 협의)</span>
+                                    <span data-lang="en">(Consult with <b>bleu</b> for regulatory interpretations)</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <div class="absolute -left-[41px] bg-blue-900 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs shadow-md">3</div>
+                        <h4 class="font-bold text-blue-900">
+                            <span data-lang="ko">최종 승인 - Evan</span><span data-lang="en">Final Approval - Evan</span>
+                        </h4>
+                        <p class="text-sm text-blue-900 font-semibold leading-relaxed">
+                            <span data-lang="ko">과제책임자 최종 승인 후 자원 활용 가능 (승인 전 사용 불가)</span>
+                            <span data-lang="en">Resources can only be utilized after final approval by Evan.</span>
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 8. Education & Contact -->
+            <section id="section8" class="scroll-mt-32 pb-12">
+                <h2 class="section-title text-2xl font-bold text-blue-900">
+                    <span data-lang="ko">8. 교육 및 문의처</span><span data-lang="en">8. Training & Contact</span>
+                </h2>
+                <div class="grid md:grid-cols-2 gap-6 text-sm">
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm text-slate-600">
+                        <h4 class="font-bold mb-4 text-slate-900"><i class="fa-solid fa-video mr-2 text-red-500"></i>Tutorials</h4>
+                        <div class="space-y-2">
+                            <a href="https://youtu.be/e6-75Ait8Io" class="block p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition truncate border border-slate-100">
+                                📺 <span data-lang="ko">2025년 AI데이터센터 교육</span><span data-lang="en">2025 AI Data Center Training</span>
+                            </a>
+                            <a href="https://youtu.be/FGetU2GBOVw" class="block p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition truncate border border-slate-100">
+                                📺 <span data-lang="ko">컴퓨팅 자원 지원 사업 교육</span><span data-lang="en">Computing Resource Training</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="bg-blue-900 text-white p-6 rounded-xl shadow-md">
+                        <h4 class="font-bold mb-4"><i class="fa-solid fa-users mr-2"></i>Contact & R&R</h4>
+                        <div class="space-y-3">
+                            <!-- Internal Roles (Top) -->
+                            <div class="flex justify-between items-center border-b border-blue-800 pb-2 gap-4">
+                                <span class="whitespace-nowrap"><span data-lang="ko">사업 담당자</span><span data-lang="en">Business Manager</span></span>
+                                <span class="text-blue-200 font-bold tracking-wider uppercase text-xs font-mono">Blue</span>
+                            </div>
+                            <div class="flex justify-between items-center border-b border-blue-800 pb-2 gap-4">
+                                <span class="whitespace-nowrap"><span data-lang="ko">실무 담당자</span><span data-lang="en">Practical Manager</span></span>
+                                <span class="text-blue-200 font-bold tracking-wider uppercase text-xs font-mono">Nate</span>
+                            </div>
+                            <div class="flex justify-between items-center border-b border-blue-800 pb-2 gap-4">
+                                <span class="whitespace-nowrap"><span data-lang="ko">과제 책임자</span><span data-lang="en">Project Lead</span></span>
+                                <span class="text-blue-200 font-bold tracking-wider uppercase text-xs font-mono">Evan</span>
+                            </div>
+                            <!-- Tech Support -->
+                            <div class="flex flex-col sm:flex-row justify-between sm:items-center border-b border-blue-800 pb-2 pt-2 gap-1 sm:gap-4">
+                                <span class="text-[10px] opacity-80 uppercase tracking-tight whitespace-nowrap">Tech Support</span>
+                                <span class="text-blue-200 font-mono text-xs break-all">tech_support@aica.dooray.com</span>
+                            </div>
+                            <div class="flex flex-col sm:flex-row justify-between sm:items-center pt-1 gap-1 sm:gap-4">
+                                <span class="text-[9px] opacity-70 font-mono uppercase tracking-tight whitespace-nowrap">AICA Center</span>
+                                <span class="text-blue-200 font-mono text-[9px] break-all">aica_dc@aicluster.or.kr</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-slate-100 py-10 border-t border-slate-200 text-center text-[11px] text-slate-400 tracking-wider">
+        <div class="max-w-4xl mx-auto px-4 uppercase">
+            <p>© 2025 <span class="text-slate-600 font-bold">Dabeeo Inc.</span> All rights reserved.</p>
+            <p class="mt-1 opacity-60 italic">Prepared by Dabeeo for AICA Infrastructure Operations</p>
+        </div>
+    </footer>
+
+    <script>
+        function changeLang(lang) {
+            document.documentElement.setAttribute('lang', lang);
+            const btnKo = document.getElementById('btn-ko');
+            const btnEn = document.getElementById('btn-en');
+            
+            if (lang === 'ko') {
+                btnKo.classList.add('active', 'text-blue-900');
+                btnKo.classList.remove('text-white');
+                btnEn.classList.remove('active', 'text-blue-900');
+                btnEn.classList.add('text-white');
+            } else {
+                btnEn.classList.add('active', 'text-blue-900');
+                btnEn.classList.remove('text-white');
+                btnKo.classList.remove('active', 'text-blue-900');
+                btnKo.classList.add('text-white');
+            }
+        }
+    </script>
+
+</body>
+</html>
